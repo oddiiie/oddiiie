@@ -3,5 +3,4 @@
 
 ![](https://komarev.com/ghpvc/?username=your-github-username)
 
-![](http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=EigoOda&theme=graywhite)
-
+![](http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username={oddiiie}&theme={nord_bright})
