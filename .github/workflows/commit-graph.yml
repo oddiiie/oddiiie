@@ -27,7 +27,8 @@ jobs:
         env:
           GH_USER: oddiiie
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DAYS: '180'
+          DAYS: '365'
+          BUCKET_DAYS: '7'
           OUTPUT: 'assets/commit-graph.svg'
         run: python scripts/generate_commit_graph.py
 
