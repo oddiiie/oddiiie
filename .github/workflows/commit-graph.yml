@@ -1,0 +1,45 @@
+name: commit-graph
+
+on:
+  schedule:
+    - cron: '17 0 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/commit-graph.yml'
+      - 'scripts/generate_commit_graph.py'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate SVG
+        env:
+          GH_USER: oddiiie
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DAYS: '180'
+          OUTPUT: 'assets/commit-graph.svg'
+        run: python scripts/generate_commit_graph.py
+
+      - name: Commit if changed
+        run: |
+          set -eu
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add assets/commit-graph.svg
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "chore: refresh commit-graph.svg [skip ci]"
+            git push
+          fi
