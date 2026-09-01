@@ -9,6 +9,7 @@ Env vars:
   GITHUB_TOKEN  — token with default read scope (required)
   DAYS          — rolling window in days (default 365)
   BUCKET_DAYS   — bucket size for aggregation (default 7)
+  SMOOTHING     — Catmull-Rom smoothing factor, 0.0=linear, 1.0=very round (default 0.5)
   OUTPUT        — output SVG path (default assets/commit-graph.svg)
 """
 from __future__ import annotations
@@ -23,6 +24,7 @@ USER = os.environ["GH_USER"]
 TOKEN = os.environ["GITHUB_TOKEN"]
 DAYS = int(os.environ.get("DAYS", "365"))
 BUCKET_DAYS = int(os.environ.get("BUCKET_DAYS", "7"))
+SMOOTHING = float(os.environ.get("SMOOTHING", "0.5"))
 OUTPUT = os.environ.get("OUTPUT", "assets/commit-graph.svg")
 
 QUERY = """
@@ -100,11 +102,42 @@ def py(c: float) -> float:
 
 
 line_pts = [(px(i), py(c)) for i, (_, c) in enumerate(buckets)]
-line_str = " ".join(f"{x:.2f},{y:.2f}" for x, y in line_pts)
-area_str = (
-    f"{px(0):.2f},{py(0):.2f} "
-    + line_str
-    + f" {px(len(buckets) - 1):.2f},{py(0):.2f}"
+
+
+def smoothed_path(pts: list[tuple[float, float]]) -> str:
+    """Cubic-Bezier path through pts using a cardinal (Catmull-Rom) spline.
+
+    SMOOTHING controls curviness: 0.0 gives straight segments, 1.0 gives a
+    very rounded curve that may overshoot near sharp value changes.
+    """
+    if not pts:
+        return ""
+    if len(pts) == 1:
+        return f"M {pts[0][0]:.2f},{pts[0][1]:.2f}"
+    parts = [f"M {pts[0][0]:.2f},{pts[0][1]:.2f}"]
+    k = SMOOTHING / 3.0
+    n = len(pts)
+    for i in range(n - 1):
+        p0 = pts[i - 1] if i > 0 else pts[i]
+        p1 = pts[i]
+        p2 = pts[i + 1]
+        p3 = pts[i + 2] if i + 2 < n else pts[i + 1]
+        cp1x = p1[0] + (p2[0] - p0[0]) * k
+        cp1y = p1[1] + (p2[1] - p0[1]) * k
+        cp2x = p2[0] - (p3[0] - p1[0]) * k
+        cp2y = p2[1] - (p3[1] - p1[1]) * k
+        parts.append(
+            f"C {cp1x:.2f},{cp1y:.2f} {cp2x:.2f},{cp2y:.2f} {p2[0]:.2f},{p2[1]:.2f}"
+        )
+    return " ".join(parts)
+
+
+line_d = smoothed_path(line_pts)
+baseline_y = py(0)
+area_d = (
+    f"{line_d} "
+    f"L {line_pts[-1][0]:.2f},{baseline_y:.2f} "
+    f"L {line_pts[0][0]:.2f},{baseline_y:.2f} Z"
 )
 
 # X-axis month ticks placed on the first bucket that starts a new month.
@@ -149,9 +182,9 @@ for c in y_ticks:
 for i, m in month_ticks:
     out.append(f'    <text x="{px(i):.2f}" y="{H - PAD_B + 20}" text-anchor="middle">{m}</text>')
 out.append('  </g>')
-out.append(f'  <polygon points="{area_str}" fill="{AREA}"/>')
+out.append(f'  <path d="{area_d}" fill="{AREA}"/>')
 out.append(
-    f'  <polyline points="{line_str}" fill="none" stroke="{LINE}" '
+    f'  <path d="{line_d}" fill="none" stroke="{LINE}" '
     'stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
 )
 out.append('</svg>')

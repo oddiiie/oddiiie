@@ -6,5 +6,3 @@
 ![](http://github-stats-extended.vercel.app/api/cards/profile-details?username=oddiiie&theme=nord_bright)
 
 ![oddy's commits — past year, weekly](./assets/commit-graph.svg)
-
-[![oddy's contribution graph (past year)](https://ghchart.rshah.org/409ba5/oddiiie)](https://github.com/oddiiie)
