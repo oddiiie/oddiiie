@@ -155,7 +155,7 @@ total = sum(c for _, c in buckets)
 # Nord palette
 BG = "#2e3440"
 FG = "#eceff4"
-MUTED = "#4c566a"
+AXIS = "#d8dee9"
 GRID = "#3b4252"
 LINE = "#88c0d0"
 AREA = "#88c0d044"
@@ -176,7 +176,7 @@ for c in y_ticks:
     yy = py(c)
     out.append(f'    <line x1="{PAD_L}" x2="{W - PAD_R}" y1="{yy:.2f}" y2="{yy:.2f}"/>')
 out.append('  </g>')
-out.append(f'  <g fill="{MUTED}" font-size="12">')
+out.append(f'  <g fill="{AXIS}" font-size="12">')
 for c in y_ticks:
     out.append(f'    <text x="{PAD_L - 8}" y="{py(c) + 4:.2f}" text-anchor="end">{c}</text>')
 for i, m in month_ticks:
