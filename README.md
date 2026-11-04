@@ -6,5 +6,3 @@
 ![](http://github-stats-extended.vercel.app/api/cards/profile-details?username=oddiiie&theme=nord_bright)
 
 ![oddy's profile summary — nord_bright](./profile-summary-card-output/nord_bright/0-profile-details.svg)
-
-![oddy's commits — past year, weekly](./assets/commit-graph.svg)
