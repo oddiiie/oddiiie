@@ -25,7 +25,7 @@ jobs:
         with:
           USERNAME: ${{ github.repository_owner }}
           UTC_OFFSET: 9
-          THEME: tokyonight
+          THEME: nord_bright
           AUTO_PUSH: false
 
       - name: Commit if changed
